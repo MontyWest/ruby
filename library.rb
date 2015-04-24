@@ -42,6 +42,9 @@ class Book
     raise if @due_date.nil?
     @due_date = nil
   end
+  def ==(other)
+    other.is_a?(Book) || @id == other.get_id
+  end
   def to_s
     "#{@id}: #{@title}, by #{@author}"
   end
@@ -59,16 +62,19 @@ class Member
     @name
   end
   def check_out(book)
-    
+    raise unless book.is_a?(Book)
+    @books.add(book)
   end
   def give_back(book)
-
+    raise unless book.is_a?(Book)
+    @books.delete(book)
   end
   def get_books
     @books
   end
   def send_overdue_notice(notice)
-
+    to_print = "Dear #{@name}, #{notice} Signed Your Library"
+    puts(to_print)
+    to_print
   end
-
 end

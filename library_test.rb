@@ -95,9 +95,9 @@ class TestMember < MiniTest::Unit::TestCase
   end
 
   def test_send_overdue_notice
-    # Just tests no exception is thrown
     notice = "GIVE BACK OUR BOOK!"
-    @mem.send_overdue_notice(notice)
+    printed = @mem.send_overdue_notice(notice)
+    assert_equal("Dear Abe, #{notice} Signed Your Library", printed)
   end
 
 end
