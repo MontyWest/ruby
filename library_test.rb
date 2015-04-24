@@ -32,3 +32,35 @@ class TestCalendar < MiniTest::Unit::TestCase
   end
 
 end
+
+class TestBook < MiniTest::Unit::TestCase
+
+  def setup
+  end
+
+  def test_getters
+    book = Book.new(1, "Moby Dick", "Herman Melville", 5)
+    assert_equal(1, book.get_id)
+    assert_equal("Moby Dick", book.get_title)
+    assert_equal("Herman Melville", book.get_author)
+    assert_equal(5, book.get_due_date)
+  end
+
+  def test_check_out
+    book = Book.new(1, "Moby Dick", "Herman Melville")
+    assert_nil(book.get_due_date)
+    book.check_out(5)
+    assert_equal(5, book.get_due_date)
+  end
+
+  def test_check_in
+    book = Book.new(1, "Moby Dick", "Herman Melville", 5)
+    book.check_in
+    assert_nil(book.get_due_date)
+  end
+
+  def test_to_s
+    book = Book.new(1, "Moby Dick", "Herman Melville", 5)
+    assert_equal("1: Moby Dick, by Herman Melville", book.to_s)
+  end
+end
