@@ -9,7 +9,7 @@ class TestCalendar < MiniTest::Unit::TestCase
 
   def test_get_date_num
     day = @cal.get_date()
-    raise unless day.is_a?(Numeric)
+    assert(day.is_a?(Numeric))
   end
 
   def test_advance
@@ -63,4 +63,41 @@ class TestBook < MiniTest::Unit::TestCase
     book = Book.new(1, "Moby Dick", "Herman Melville", 5)
     assert_equal("1: Moby Dick, by Herman Melville", book.to_s)
   end
+end
+
+require 'set'
+
+class TestMember < MiniTest::Unit::TestCase
+  def setup
+    @mem = Member.new("Abe", nil)
+  end
+
+  def test_getters
+    assert_equal("Abe", @mem.get_name)
+    assert(@mem.get_books.is_a?(Set))
+  end
+
+  def test_check_out
+    book = Book.new(1, "Moby Dick", "Herman Melville", 5)
+    @mem.check_out(book)
+    books = @mem.get_books
+    assert(books.include?(book))
+  end
+
+  def test_give_back
+    book = Book.new(1, "Moby Dick", "Herman Melville", 5)
+    @mem.check_out(book)
+    books = @mem.get_books
+    assert(books.include?(book))
+    @mem.give_back(book)
+    books_after = @mem.get_books
+    assert(!books.include?(book))
+  end
+
+  def test_send_overdue_notice
+    # Just tests no exception is thrown
+    notice = "GIVE BACK OUR BOOK!"
+    @mem.send_overdue_notice(notice)
+  end
+
 end

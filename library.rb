@@ -47,3 +47,28 @@ class Book
   end
 end
 
+require 'set'
+
+class Member
+  def initialize(name, library)
+    @name = name
+    @library = library
+    @books = Set.new []
+  end
+  def get_name
+    @name
+  end
+  def check_out(book)
+    
+  end
+  def give_back(book)
+
+  end
+  def get_books
+    @books
+  end
+  def send_overdue_notice(notice)
+
+  end
+
+end
