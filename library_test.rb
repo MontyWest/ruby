@@ -1,7 +1,7 @@
 require_relative 'library.rb'
 require 'minitest/autorun'
 
-class TestCalendar < Minitest::Test
+class TestCalendar < MiniTest::Unit::TestCase
 
   def setup
     @cal = Calendar.instance
@@ -10,11 +10,6 @@ class TestCalendar < Minitest::Test
   def test_get_date_num
     day = @cal.get_date()
     raise unless day.is_a?(Numeric)
-  end
-
-  def test_day_zero
-    # singleton??? test order important
-    assert_equal(0, @cal.get_date())
   end
 
   def test_advance
