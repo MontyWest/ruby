@@ -122,7 +122,6 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.is_open = true
     day_before = @lib.calendar.get_date
     message = assert_raises(RuntimeError){@lib.open}.to_s
-    puts(message)
     day_after = @lib.calendar.get_date
     assert(@lib.is_open)
     assert_equal("The library is already open!", message)
@@ -190,7 +189,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.members = {"Abe" => mem}
     @lib.serving = nil
 
-    message @lib.serve("Abe")
+    message = @lib.serve("Abe")
 
     assert_equal("Now serving Abe.", message)
     assert(!@lib.serving.nil?)
@@ -215,7 +214,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.members = {"Abe" => mem1, "Mos" => mem2}
     @lib.serving = mem2
 
-    message @lib.serve("Abe")
+    message = @lib.serve("Abe")
 
     assert_equal("Now serving Abe.", message)
     assert(!@lib.serving.nil?)
@@ -312,7 +311,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.serving = mem
     @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
 
-    @lib.check_in(1, 2)
+    message = @lib.check_in(1, 2)
     assert_equal("Abe has returned 2 books.", message)
     assert_nil(book2.get_due_date)
     assert_nil(book3.get_due_date)
@@ -473,18 +472,18 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.serving = mem
     @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
 
-    @lib.renew(1, 2)
+    message = @lib.renew(1, 2)
     assert_equal("2 books have been renewed for Abe.", message)
+    assert_equal(today + 7, book1.get_due_date)
     assert_equal(today + 7, book2.get_due_date)
-    assert_equal(today + 7, book3.get_due_date)
+    assert(mem.get_books.include?(book1))
     assert(mem.get_books.include?(book2))
-    assert(mem.get_books.include?(book3))
   end
 
   def test_close_not_open
     @lib.is_open = false
     message = assert_raises(RuntimeError){@lib.close}.to_s
-    assert_equal("The library is not open", message)
+    assert_equal("The library is not open.", message)
   end
 
   def test_close
@@ -494,5 +493,13 @@ class TestLibrary < MiniTest::Unit::TestCase
     assert_equal("Good night.", message)
   end
 
+  def test_quit_open
+    @lib.is_open = true
+    assert_raises(SystemExit){@lib.quit}
+  end
 
+  def test_quit_closed
+    @lib.is_open = false
+    assert_raises(SystemExit){@lib.quit}
+  end
 end
