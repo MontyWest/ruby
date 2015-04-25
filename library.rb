@@ -35,11 +35,11 @@ class Book
     @due_date
   end
   def check_out(due_date)
-    raise unless @due_date.nil?
+    raise 'Book already checked out' unless @due_date.nil?
     @due_date = due_date
   end
   def check_in
-    raise if @due_date.nil?
+    raise 'Book not checked out' if @due_date.nil?
     @due_date = nil
   end
   def ==(other)
@@ -76,5 +76,52 @@ class Member
     to_print = "Dear #{@name}, #{notice} Signed Your Library"
     puts(to_print)
     to_print
+  end
+end
+
+
+class Library
+  #For testing
+  attr_accessor :books, :calendar, :members, :is_open, :serving
+
+  def initialize
+    @books = {}
+    @calendar = Calendar.instance
+    @members = {}
+    @open = false
+    @serving = nil
+  end
+  def open
+
+  end
+  def find_all_overdue_books
+
+  end
+  def issue_card(name_of_member)
+
+  end
+  def serve(name_of_member)
+
+  end
+  def find_overdue_books
+
+  end
+  def check_in(*book_numbers)
+
+  end
+  def search(string)
+
+  end
+  def check_out(*book_ids)
+
+  end
+  def renew(*book_ids)
+
+  end
+  def close
+
+  end
+  def quit
+
   end
 end
