@@ -121,7 +121,8 @@ class TestLibrary < MiniTest::Unit::TestCase
   def test_open_fail
     @lib.is_open = true
     day_before = @lib.calendar.get_date
-    message = assert_raises(RuntimeError){@lib.open}
+    message = assert_raises(RuntimeError){@lib.open}.to_s
+    puts(message)
     day_after = @lib.calendar.get_date
     assert(@lib.is_open)
     assert_equal("The library is already open!", message)
@@ -179,7 +180,7 @@ class TestLibrary < MiniTest::Unit::TestCase
 
   def test_issue_card_closed
     @lib.is_open = false
-    message = assert_raises(RuntimeError){@lib.issue_card("Abe")}
+    message = assert_raises(RuntimeError){@lib.issue_card("Abe")}.to_s
     assert_equal("The library is not open.", message)
   end
 
@@ -223,14 +224,14 @@ class TestLibrary < MiniTest::Unit::TestCase
 
   def test_serve_closed
     @lib.is_open = false
-    message = assert_raises(RuntimeError){@lib.serve("Abe")}
+    message = assert_raises(RuntimeError){@lib.serve("Abe")}.to_s
     assert_equal("The library is not open.", message)
   end
 
   def test_find_overdue_no_serve
     @lib.is_open = true
     @lib.serving = nil
-    message = assert_raises(RuntimeError){@lib.find_overdue_books}
+    message = assert_raises(RuntimeError){@lib.find_overdue_books}.to_s
     assert_equal("No member is currently being served.", message)
   end
 
@@ -238,7 +239,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.is_open = false
     mem = Member.new("Abe", @lib)
     @lib.serving = mem
-    message = assert_raises(RuntimeError){@lib.find_overdue_books}
+    message = assert_raises(RuntimeError){@lib.find_overdue_books}.to_s
     assert_equal("The library is not open.", message)
   end
 
@@ -273,7 +274,7 @@ class TestLibrary < MiniTest::Unit::TestCase
   def test_check_in_no_serve
     @lib.is_open = true
     @lib.serving = nil
-    message = assert_raises(RuntimeError){@lib.check_in(1,2)}
+    message = assert_raises(RuntimeError){@lib.check_in(1,2)}.to_s
     assert_equal("No member is currently being served.", message)
   end
 
@@ -281,7 +282,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.is_open = false
     mem = Member.new("Abe", @lib)
     @lib.serving = mem
-    message = assert_raises(RuntimeError){@lib.check_in(1,2)}
+    message = assert_raises(RuntimeError){@lib.check_in(1,2)}.to_s
     assert_equal("The library is not open.", message)
   end
 
@@ -295,7 +296,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.serving = mem
     @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
 
-    message = assert_raises(RuntimeError){@lib.check_in(1)}
+    message = assert_raises(RuntimeError){@lib.check_in(1)}.to_s
     assert_equal("The member does not have book 1.", message)
   end
 
@@ -375,7 +376,7 @@ class TestLibrary < MiniTest::Unit::TestCase
   def test_check_out_no_serve
     @lib.is_open = true
     @lib.serving = nil
-    message = assert_raises(RuntimeError){@lib.check_out(1,2)}
+    message = assert_raises(RuntimeError){@lib.check_out(1,2)}.to_s
     assert_equal("No member is currently being served.", message)
   end
 
@@ -383,7 +384,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.is_open = false
     mem = Member.new("Abe", @lib)
     @lib.serving = mem
-    message = assert_raises(RuntimeError){@lib.check_out(1,2)}
+    message = assert_raises(RuntimeError){@lib.check_out(1,2)}.to_s
     assert_equal("The library is not open.", message)
   end
 
@@ -396,7 +397,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
     book4 = Book.new(4, "Bleak House", "Charles Dickens")
     @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
-    message = assert_raises(RuntimeError){@lib.check_out(5)}
+    message = assert_raises(RuntimeError){@lib.check_out(5)}.to_s
     assert_equal("The library does not have book 5.", message)
   end
 
@@ -409,7 +410,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
     book4 = Book.new(4, "Bleak House", "Charles Dickens")
     @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
-    message = assert_raises(RuntimeError){@lib.check_out(2,3)}
+    message = assert_raises(RuntimeError){@lib.check_out(2,3)}.to_s
     assert_equal("The library does not have book 2.", message)
   end
 
@@ -433,7 +434,7 @@ class TestLibrary < MiniTest::Unit::TestCase
   def test_renew_no_serve
     @lib.is_open = true
     @lib.serving = nil
-    message = assert_raises(RuntimeError){@lib.renew(1,2)}
+    message = assert_raises(RuntimeError){@lib.renew(1,2)}.to_s
     assert_equal("No member is currently being served.", message)
   end
 
@@ -441,7 +442,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.is_open = false
     mem = Member.new("Abe", @lib)
     @lib.serving = mem
-    message = assert_raises(RuntimeError){@lib.renew(1,2)}
+    message = assert_raises(RuntimeError){@lib.renew(1,2)}.to_s
     assert_equal("The library is not open.", message)
   end
 
@@ -455,7 +456,7 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.serving = mem
     @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
 
-    message = assert_raises(RuntimeError){@lib.renew(1)}
+    message = assert_raises(RuntimeError){@lib.renew(1)}.to_s
     assert_equal("The member does not have book 1.", message)
   end
 
@@ -482,7 +483,7 @@ class TestLibrary < MiniTest::Unit::TestCase
 
   def test_close_not_open
     @lib.is_open = false
-    message = assert_raises(RuntimeError){@lib.close}
+    message = assert_raises(RuntimeError){@lib.close}.to_s
     assert_equal("The library is not open", message)
   end
 

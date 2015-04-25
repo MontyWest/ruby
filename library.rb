@@ -6,9 +6,11 @@ class Calendar
   def initialize
     @day = 0
   end
+
   def get_date
     @day
   end
+
   def advance
     @day = @day + 1
     @day
@@ -34,17 +36,21 @@ class Book
   def get_due_date
     @due_date
   end
+
   def check_out(due_date)
     raise 'Book already checked out' unless @due_date.nil?
     @due_date = due_date
   end
+
   def check_in
     raise 'Book not checked out' if @due_date.nil?
     @due_date = nil
   end
+
   def ==(other)
     other.is_a?(Book) || @id == other.get_id
   end
+
   def to_s
     "#{@id}: #{@title}, by #{@author}"
   end
@@ -61,17 +67,21 @@ class Member
   def get_name
     @name
   end
+
   def check_out(book)
     raise unless book.is_a?(Book)
     @books.add(book)
   end
+
   def give_back(book)
     raise unless book.is_a?(Book)
     @books.delete(book)
   end
+
   def get_books
     @books
   end
+
   def send_overdue_notice(notice)
     to_print = "Dear #{@name}, #{notice} Signed Your Library"
     puts(to_print)
@@ -85,17 +95,22 @@ class Library
   attr_accessor :books, :calendar, :members, :is_open, :serving
 
   def initialize
-    @books = {}
+    import_books
     @calendar = Calendar.instance
     @members = {}
-    @open = false
+    @is_open = false
     @serving = nil
   end
+
   def open
-
+    raise 'The library is already open!' if @is_open
+    @is_open = true
+    day = @calendar.advance
+    "Today is day #{day}"
   end
-  def find_all_overdue_books
 
+  def find_all_overdue_books
+    
   end
   def issue_card(name_of_member)
 
@@ -123,5 +138,20 @@ class Library
   end
   def quit
 
+  end
+
+  private
+  require 'csv'
+  def import_books
+    @books = {}
+    i = 0
+    CSV.foreach('collection.txt') do |row|
+      arr = row
+      i = i + 1
+      title = arr[0].gsub('(', '')
+      author = arr[1].gsub(')', '')
+      book = Book.new(i, title, author)
+      @books[i] = book
+    end
   end
 end
