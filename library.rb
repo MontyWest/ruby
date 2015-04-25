@@ -110,33 +110,73 @@ class Library
   end
 
   def find_all_overdue_books
-    
+    raise 'The library is not open.' unless @is_open
+    exists_od = false
+    od_mems = []
+    today = @calendar.get_date
+    @members.each do |name, mem|
+      has_overdue = false
+      od_books = []
+      mem.get_books.each do |book|
+        if !book.get_due_date.nil? && book.get_due_date < today
+          has_overdue = true
+          od_books.push(book.to_s)
+        end
+      end
+      if has_overdue
+        exists_od = true
+        od_mems.push(
+            "#{name}:\n\t#{od_books.join("\n\t")}"
+        )
+      end
+    end
+    message = "No books are overdue."
+    if exists_od
+      message = "#{od_mems.join("\n")}"
+    end
+    message
   end
-  def issue_card(name_of_member)
 
+  def issue_card(name_of_member)
+    raise 'The library is not open.' unless @is_open
+    if @members.include?(name_of_member)
+      return "#{name_of_member} already has a library card."
+    end
+    new_member = Member.new(name_of_member, self)
+    @members[name_of_member] = new_member
+    "Library card issued to #{name_of_member}."
   end
+
   def serve(name_of_member)
+    raise 'The library is not open.' unless @is_open
 
   end
   def find_overdue_books
+    raise 'The library is not open.' unless @is_open
 
   end
   def check_in(*book_numbers)
+    raise 'The library is not open.' unless @is_open
 
   end
   def search(string)
+    raise 'The library is not open.' unless @is_open
 
   end
   def check_out(*book_ids)
+    raise 'The library is not open.' unless @is_open
 
   end
   def renew(*book_ids)
+    raise 'The library is not open.' unless @is_open
 
   end
   def close
+    raise 'The library is not open.' unless @is_open
 
   end
   def quit
+    raise 'The library is not open.' unless @is_open
 
   end
 

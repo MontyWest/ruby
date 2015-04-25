@@ -131,7 +131,7 @@ class TestLibrary < MiniTest::Unit::TestCase
 
   def test_find_all_overdue_closed
     @lib.is_open = false
-    message = @lib.find_all_overdue_books
+    message = assert_raises(RuntimeError){@lib.find_all_overdue_books}.to_s
     assert_equal("The library is not open.", message)
   end
 
@@ -144,9 +144,9 @@ class TestLibrary < MiniTest::Unit::TestCase
     @lib.members[mem.get_name] = mem
     message = @lib.find_all_overdue_books
 
-    assert("#{message}".include? "abe")
-    assert("#{message}".include? "Moby Dick")
-    assert("#{message}".include? "Herman Melville")
+    assert(message.include?("Abe"), 'Message should contain Abe')
+    assert(message.include?("Moby Dick"), 'Message should contain Moby Dick')
+    assert(message.include?("Herman Melville"), 'Message should contain Herman Melville')
   end
 
   def test_find_all_overdue_books_n
@@ -322,7 +322,7 @@ class TestLibrary < MiniTest::Unit::TestCase
 
   def test_search_closed
     @lib.is_open = false
-    message = @lib.search("abc")
+    message = assert_raises(RuntimeError){@lib.search("abc")}.to_s
     assert_equal("The library is not open.", message)
   end
 
