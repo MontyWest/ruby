@@ -13,7 +13,6 @@ class Calendar
 
   def advance
     @day = @day + 1
-    @day
   end
 end
 
