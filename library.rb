@@ -162,6 +162,19 @@ class Library
     "Now serving #{name_of_member}."
   end
 
+  def see_serving
+    raise 'No member is currently being served.' if serving.nil?
+    books = []
+    @serving.get_books.each do |book|
+      due = "Due in #{book.get_due_date - @calendar.get_date} days."
+      if due < 0
+        due = 'Overdue.'
+      end
+      books.push "#{book.to_s} - #{due}"
+    end
+    "#{@serving.get_name}:\n\t#{books.join("\n\t")}"
+  end
+
   def find_overdue_books
     raise 'The library is not open.' unless @is_open
     raise 'No member is currently being served.' if serving.nil?
@@ -200,7 +213,7 @@ class Library
 
     term = string.downcase
     results = []
-    @books.each do |id, book|
+    @books.each do |_, book|
       if book.get_due_date.nil?
         if book.get_title.downcase.include?(term) || book.get_author.downcase.include?(term)
           add = true
