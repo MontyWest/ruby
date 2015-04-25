@@ -121,29 +121,37 @@ class TestLibrary < MiniTest::Unit::TestCase
   def test_open_fail
     @lib.is_open = true
     day_before = @lib.calendar.get_date
-    message = assert_raise(RuntimeError){@lib.open}
+    message = assert_raises(RuntimeError){@lib.open}
     day_after = @lib.calendar.get_date
     assert(@lib.is_open)
     assert_equal("The library is already open!", message)
     assert_equal(day_before, day_after)
   end
 
-  def test_find_all_overdue_books_some
+  def test_find_all_overdue_closed
+    @lib.is_open = false
+    message = @lib.find_all_overdue_books
+    assert_equal("The library is not open.", message)
+  end
+
+  def test_find_all_overdue_books
+    @lib.is_open = true
     mem = Member.new("Abe", @lib)
-    book = Book.new(1, "Moby Dick", "Herman Melville", @lib.calendar.getDate() - 1)
+    book = Book.new(1, "Moby Dick", "Herman Melville", @lib.calendar.get_date() - 1)
     mem.check_out(book)
     @lib.books[1] = book
     @lib.members[mem.get_name] = mem
     message = @lib.find_all_overdue_books
 
-    assert(message.include? "abe")
-    assert(message.include? "Moby Dick")
-    assert(message.include? "Herman Melville")
+    assert("#{message}".include? "abe")
+    assert("#{message}".include? "Moby Dick")
+    assert("#{message}".include? "Herman Melville")
   end
 
-  def test_find_all_overdue_books_none
+  def test_find_all_overdue_books_n
+    @lib.is_open = true
     mem = Member.new("Abe", @lib)
-    book = Book.new(1, "Moby Dick", "Herman Melville", @lib.calendar.getDate() + 1)
+    book = Book.new(1, "Moby Dick", "Herman Melville", @lib.calendar.get_date() + 1)
     mem.check_out(book)
     @lib.books = {1 => book}
     @lib.members = {mem.get_name => mem}
@@ -219,14 +227,14 @@ class TestLibrary < MiniTest::Unit::TestCase
     assert_equal("The library is not open.", message)
   end
 
-  def find_overdue_books_no_serve
+  def test_find_overdue_no_serve
     @lib.is_open = true
     @lib.serving = nil
     message = assert_raises(RuntimeError){@lib.find_overdue_books}
     assert_equal("No member is currently being served.", message)
   end
 
-  def find_overdue_books_closed
+  def test_find_overdue_books_closed
     @lib.is_open = false
     mem = Member.new("Abe", @lib)
     @lib.serving = mem
@@ -234,10 +242,10 @@ class TestLibrary < MiniTest::Unit::TestCase
     assert_equal("The library is not open.", message)
   end
 
-  def find_overdue_books_none
-    @lib.is_open = ture
+  def test_find_overdue_books_none
+    @lib.is_open = true
     mem = Member.new("Abe", @lib)
-    book = Book.new(1, "Moby Dick", "Herman Melville", @lib.calendar.getDate() + 1)
+    book = Book.new(1, "Moby Dick", "Herman Melville", @lib.calendar.get_date() + 1)
     mem.check_out(book)
     @lib.serving = mem
     @lib.members = {"Abe" => mem}
@@ -246,12 +254,12 @@ class TestLibrary < MiniTest::Unit::TestCase
     assert_equal("None.", message)
   end
 
-  def find_overdue_books_some
-    @lib.is_open = ture
+  def test_find_overdue_books_some
+    @lib.is_open = true
     mem = Member.new("Abe", @lib)
-    book1 = Book.new(1, "Moby Dick", "Herman Melville", @lib.calendar.getDate() - 1)
-    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut", @lib.calendar.getDate() - 1)
-    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis", @lib.calendar.getDate() + 1)
+    book1 = Book.new(1, "Moby Dick", "Herman Melville", @lib.calendar.get_date() - 1)
+    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut", @lib.calendar.get_date() - 1)
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis", @lib.calendar.get_date() + 1)
     mem.check_out(book1)
     mem.check_out(book2)
     mem.check_out(book3)
@@ -262,12 +270,69 @@ class TestLibrary < MiniTest::Unit::TestCase
     assert_equal("#{book1.to_s}\n#{book2.to_s}", message)
   end
 
-  def search_bad_query
+  def test_check_in_no_serve
+    @lib.is_open = true
+    @lib.serving = nil
+    message = assert_raises(RuntimeError){@lib.check_in(1,2)}
+    assert_equal("No member is currently being served.", message)
+  end
+
+  def test_check_in_closed
+    @lib.is_open = false
+    mem = Member.new("Abe", @lib)
+    @lib.serving = mem
+    message = assert_raises(RuntimeError){@lib.check_in(1,2)}
+    assert_equal("The library is not open.", message)
+  end
+
+  def test_check_in_not_coed
+    @lib.is_open = true
+    mem = Member.new("Abe", @lib)
+    book1 = Book.new(1, "Moby Dick", "Herman Melville")
+    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut")
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
+    book4 = Book.new(4, "Bleak House", "Charles Dickens")
+    @lib.serving = mem
+    @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
+
+    message = assert_raises(RuntimeError){@lib.check_in(1)}
+    assert_equal("The member does not have book 1.", message)
+  end
+
+  def test_check_in
+    @lib.is_open = true
+    mem = Member.new("Abe", @lib)
+    book1 = Book.new(1, "Moby Dick", "Herman Melville", 10)
+    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut", 10)
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
+    book4 = Book.new(4, "Bleak House", "Charles Dickens")
+    mem.check_out(book1)
+    mem.check_out(book2)
+    @lib.serving = mem
+    @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
+
+    @lib.check_in(1, 2)
+    assert_equal("Abe has returned 2 books.", message)
+    assert_nil(book2.get_due_date)
+    assert_nil(book3.get_due_date)
+    assert(!mem.get_books.include?(book2))
+    assert(!mem.get_books.include?(book3))
+  end
+
+  def test_search_closed
+    @lib.is_open = false
+    message = @lib.search("abc")
+    assert_equal("The library is not open.", message)
+  end
+
+  def test_search_bad_query
+    @lib.is_open = true
     message = @lib.search("abc")
     assert_equal("Search string must contain at least four characters.", message)
   end
 
-  def search_no_books_found
+  def test_search_no_books_found
+    @lib.is_open = true
     book1 = Book.new(1, "Moby Dick", "Herman Melville")
     book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut")
     book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
@@ -276,26 +341,29 @@ class TestLibrary < MiniTest::Unit::TestCase
     assert_equal("No books found.", message)
   end
 
-  def search_no_available_found
+  def test_search_no_available_found
+    @lib.is_open = true
     book1 = Book.new(1, "Moby Dick", "Herman Melville")
     book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut")
-    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis", @lib.calendar.getDate() + 1)
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis", 10)
     @lib.books = {1 => book1, 2 => book2, 3 => book3}
     message = @lib.search("Zero")
     assert_equal("No books found.", message)
   end
 
-  def search_books_found_case
+  def test_search_books_found_case
+    @lib.is_open = true
     book1 = Book.new(1, "Moby Dick", "Herman Melville")
     book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut")
     book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
-    book4 = Book.new(4, "Bleak House", "Charles Dickins")
+    book4 = Book.new(4, "Bleak House", "Charles Dickens")
     @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
     message = @lib.search("house")
     assert_equal("#{book2.to_s}\n#{book4.to_s}", message)
   end
 
-  def search_books_no_duplicates
+  def test_search_books_no_dupes
+    @lib.is_open = true
     book1 = Book.new(1, "Moby Dick", "Herman Melville")
     book2 = Book.new(2, "Moby Dick", "Herman Melville")
     book3 = Book.new(3, "Slaughterhouse-Five", "Kurt Vonnegut")
@@ -303,5 +371,127 @@ class TestLibrary < MiniTest::Unit::TestCase
     message = @lib.search("moby")
     assert_equal("#{book1.to_s}", message)
   end
+
+  def test_check_out_no_serve
+    @lib.is_open = true
+    @lib.serving = nil
+    message = assert_raises(RuntimeError){@lib.check_out(1,2)}
+    assert_equal("No member is currently being served.", message)
+  end
+
+  def test_check_out_closed
+    @lib.is_open = false
+    mem = Member.new("Abe", @lib)
+    @lib.serving = mem
+    message = assert_raises(RuntimeError){@lib.check_out(1,2)}
+    assert_equal("The library is not open.", message)
+  end
+
+  def test_check_out_no_book
+    @lib.is_open = true
+    mem = Member.new("Abe", @lib)
+    @lib.serving = mem
+    book1 = Book.new(1, "Moby Dick", "Herman Melville")
+    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut")
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
+    book4 = Book.new(4, "Bleak House", "Charles Dickens")
+    @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
+    message = assert_raises(RuntimeError){@lib.check_out(5)}
+    assert_equal("The library does not have book 5.", message)
+  end
+
+  def test_check_out_book_unav
+    @lib.is_open = true
+    mem = Member.new("Abe", @lib)
+    @lib.serving = mem
+    book1 = Book.new(1, "Moby Dick", "Herman Melville")
+    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut", 10)
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
+    book4 = Book.new(4, "Bleak House", "Charles Dickens")
+    @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
+    message = assert_raises(RuntimeError){@lib.check_out(2,3)}
+    assert_equal("The library does not have book 2.", message)
+  end
+
+  def test_check_out
+    @lib.is_open = true
+    mem = Member.new("Abe", @lib)
+    @lib.serving = mem
+    book1 = Book.new(1, "Moby Dick", "Herman Melville")
+    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut")
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
+    book4 = Book.new(4, "Bleak House", "Charles Dickens")
+    @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
+    message = @lib.check_out(2, 3)
+    assert_equal("2 books have been checked out to Abe.", message)
+    assert(!book2.get_due_date.nil?)
+    assert(!book3.get_due_date.nil?)
+    assert(mem.get_books.include?(book2))
+    assert(mem.get_books.include?(book3))
+  end
+
+  def test_renew_no_serve
+    @lib.is_open = true
+    @lib.serving = nil
+    message = assert_raises(RuntimeError){@lib.renew(1,2)}
+    assert_equal("No member is currently being served.", message)
+  end
+
+  def test_renew_closed
+    @lib.is_open = false
+    mem = Member.new("Abe", @lib)
+    @lib.serving = mem
+    message = assert_raises(RuntimeError){@lib.renew(1,2)}
+    assert_equal("The library is not open.", message)
+  end
+
+  def test_renew_not_coed
+    @lib.is_open = true
+    mem = Member.new("Abe", @lib)
+    book1 = Book.new(1, "Moby Dick", "Herman Melville")
+    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut")
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
+    book4 = Book.new(4, "Bleak House", "Charles Dickens")
+    @lib.serving = mem
+    @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
+
+    message = assert_raises(RuntimeError){@lib.renew(1)}
+    assert_equal("The member does not have book 1.", message)
+  end
+
+  def test_renew
+    @lib.is_open = true
+    today = @lib.calendar.get_date
+    mem = Member.new("Abe", @lib)
+    book1 = Book.new(1, "Moby Dick", "Herman Melville", 3)
+    book2 = Book.new(2, "Slaughterhouse-Five", "Kurt Vonnegut", 3)
+    book3 = Book.new(3, "Less Than Zero", "Brett Easton Ellis")
+    book4 = Book.new(4, "Bleak House", "Charles Dickens")
+    mem.check_out(book1)
+    mem.check_out(book2)
+    @lib.serving = mem
+    @lib.books = {1 => book1, 2 => book2, 3 => book3, 4 => book4}
+
+    @lib.renew(1, 2)
+    assert_equal("2 books have been renewed for Abe.", message)
+    assert_equal(today + 7, book2.get_due_date)
+    assert_equal(today + 7, book3.get_due_date)
+    assert(mem.get_books.include?(book2))
+    assert(mem.get_books.include?(book3))
+  end
+
+  def test_close_not_open
+    @lib.is_open = false
+    message = assert_raises(RuntimeError){@lib.close}
+    assert_equal("The library is not open", message)
+  end
+
+  def test_close
+    @lib.is_open = true
+    message = @lib.close
+    assert(!@lib.is_open)
+    assert_equal("Good night.", message)
+  end
+
 
 end
