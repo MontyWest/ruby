@@ -13,11 +13,14 @@ $ irb
 ```
 - Use library as described in library.pdf (Note using **puts** as the beginning of each function will ensure proper formatting)  e.g.
 ```
-> my_lib.open
-=> "Today is day 1"
-> my_lib.issue_card('Dave')
-=> "Library card issued to Dave."
-> my_lib.serve('Dave')
-=> "Now serving Dave."
+> puts my_lib.open
+Today is day 1
+=> nil
+> puts my_lib.issue_card('Dave')
+Library card issued to Dave.
+=> nil
+> puts my_lib.serve('Dave')
+Now serving Dave.
+=> nil
 etc.
 ```
